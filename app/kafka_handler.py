@@ -3,6 +3,7 @@ import logging
 from typing import List
 from kafka import KafkaConsumer, KafkaProducer
 import sys
+import json
 
 # Configure logging
 logging.basicConfig(
@@ -40,7 +41,7 @@ def setup_kafka_consumer(config: KafkaConfig, topics: List[str]) -> KafkaConsume
         *topics,
         group_id=config.group_id,
         bootstrap_servers=config.bootstrap_servers,
-        auto_offset_reset='earliest'  # Automatically reset offsets to the earliest if no offset is committed
+        value_deserializer=json_deserializer
     )
     return consumer
 
@@ -51,6 +52,14 @@ def setup_kafka_producer(config: KafkaConfig) -> KafkaProducer:
         value_serializer=lambda v: v.encode('utf-8')
     )
     return producer
+
+def json_deserializer(message):
+    """Deserialize JSON message."""
+    try:
+        return json.loads(message.decode("utf-8"))
+    except json.JSONDecodeError as e:
+        logging.error(f"Failed to decode JSON message: {e}")
+        return None
 
 def on_message_print(msg):
     """Process and print the received Kafka message."""
