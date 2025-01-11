@@ -54,13 +54,12 @@ def setup_kafka_consumer(config: KafkaConfig, topics: List[str]) -> KafkaConsume
 def setup_kafka_producer(config: KafkaConfig) -> KafkaProducer:
     """Sets up a default Kafka producer."""
     producer = KafkaProducer(
-        bootstrap_servers=config.bootstrap_servers,
-        value_serializer=json_deserializer
+        bootstrap_servers=config.bootstrap_servers, value_serializer=json_serializer
     )
     return producer
 
 
-def json_deserializer(message) -> None:
+def json_deserializer(message):
     """Deserialize JSON message."""
     try:
         return json.loads(message.decode("utf-8"))
@@ -69,9 +68,18 @@ def json_deserializer(message) -> None:
         return None
 
 
+def json_serializer(data):
+    """Serialize data to JSON."""
+    try:
+        return json.dumps(data).encode("utf-8")
+    except TypeError as e:
+        logging.error(f"Failed to serialize data to JSON: {e}")
+        return None
+
+
 def on_message_print(msg) -> None:
     """Process and print the received Kafka message."""
-    logging.info(f"Received message: {msg.topic} -> {msg.value}")
+    logging.info(f"Received message: {msg.topic} -> {msg.value.decode('utf-8')}")
 
 
 def close_consumer(consumer: KafkaConsumer) -> None:
@@ -90,14 +98,9 @@ def close_producer(producer: KafkaProducer) -> None:
 
 def send_kafka_message(producer: KafkaProducer, topic: str, payload: str) -> None:
     """Method to send a message to a Kafka topic."""
-    
-    # use always this json layout in order to work with the mqtt-kafka-bridge 
-    json_content = {
-        'message': json.dumps({
-            'source': 'kafka',
-            'payload': payload
-        })
-    }
+
+    # use always this json layout in order to work with the mqtt-kafka-bridge
+    json_content = {"message": json.dumps({"source": "kafka", "payload": payload})}
 
     producer.send(topic, json.dumps(json_content))
     logging.info(f"Sent message to Kafka topic: {topic}")
