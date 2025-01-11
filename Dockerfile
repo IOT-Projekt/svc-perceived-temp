@@ -6,8 +6,9 @@ WORKDIR /app
 
 # Copy the current directory contents into the container at /app
 COPY app .
+COPY requirements.txt .
 
-# Install any needed packages specified in requirements.txt
+# Install the required Python packages
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Run main.py when the container launches
