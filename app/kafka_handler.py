@@ -23,7 +23,7 @@ class KafkaConfig:
         return cls._instance
 
     def _initialize(self):
-        """Initialize configuration values."""
+        """Initialize configuration values. Just set variables like Kafka broker IP from the .env file."""
         self.bootstrap_servers = os.getenv(
             "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
         )  # Kafka broker(s)
@@ -31,7 +31,7 @@ class KafkaConfig:
         self.validate()
 
     def validate(self) -> bool:
-        """Validate the required configuration fields."""
+        """Validate if required configuration values are set."""
         if not self.bootstrap_servers:
             raise ValueError(
                 "Environment variable KAFKA_BOOTSTRAP_SERVERS is missing or empty."
@@ -41,7 +41,7 @@ class KafkaConfig:
 
 
 def setup_kafka_consumer(config: KafkaConfig, topics: List[str]) -> KafkaConsumer:
-    """Sets up the Kafka consumer with appropriate settings."""
+    """Sets up a default Kafka consumer. Topics are passed as a list of strings."""
     consumer = KafkaConsumer(
         *topics,
         group_id=config.group_id,
@@ -52,15 +52,15 @@ def setup_kafka_consumer(config: KafkaConfig, topics: List[str]) -> KafkaConsume
 
 
 def setup_kafka_producer(config: KafkaConfig) -> KafkaProducer:
-    """Sets up the Kafka producer with appropriate settings."""
+    """Sets up a default Kafka producer."""
     producer = KafkaProducer(
         bootstrap_servers=config.bootstrap_servers,
-        value_serializer=lambda v: v.encode("utf-8"),
+        value_serializer=json_deserializer
     )
     return producer
 
 
-def json_deserializer(message):
+def json_deserializer(message) -> None:
     """Deserialize JSON message."""
     try:
         return json.loads(message.decode("utf-8"))
@@ -69,26 +69,26 @@ def json_deserializer(message):
         return None
 
 
-def on_message_print(msg):
+def on_message_print(msg) -> None:
     """Process and print the received Kafka message."""
-    logging.info(f"Received message: {msg.topic} -> {msg.value.decode('utf-8')}")
+    logging.info(f"Received message: {msg.topic} -> {msg.value}")
 
 
-def close_consumer(consumer: KafkaConsumer):
+def close_consumer(consumer: KafkaConsumer) -> None:
     """Method to close the kafka consumer connection."""
     logging.info("Closing Kafka consumer")
     consumer.close()
     sys.exit(0)
 
 
-def close_producer(producer: KafkaProducer):
+def close_producer(producer: KafkaProducer) -> None:
     """Method to close the kafka producer connection."""
     logging.info("Closing Kafka producer")
     producer.close()
     sys.exit(0)
 
 
-def send_kafka_message(producer: KafkaProducer, topic: str, payload: str):
+def send_kafka_message(producer: KafkaProducer, topic: str, payload: str) -> None:
     """Method to send a message to a Kafka topic."""
     
     # use always this json layout in order to work with the mqtt-kafka-bridge 
