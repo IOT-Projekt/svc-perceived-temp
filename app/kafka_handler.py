@@ -92,12 +92,12 @@ def send_kafka_message(producer: KafkaProducer, topic: str, payload: str):
     """Method to send a message to a Kafka topic."""
     
     # use always this json layout in order to work with the mqtt-kafka-bridge 
-    json_content = { "message": 
-                        {   
-                            "source": "kafka", 
-                            "payload": payload 
-                        }
-                   }
+    json_content = {
+        'message': json.dumps({
+            'source': 'kafka',
+            'payload': payload
+        })
+    }
 
     producer.send(topic, json.dumps(json_content))
     logging.info(f"Sent message to Kafka topic: {topic}")
