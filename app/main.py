@@ -1,7 +1,7 @@
 import json
 import threading
 from perceived_temp import calculate_perceived_temperature
-import kafka_handler
+from kafka_handler import KafkaConsumer, KafkaProducer, KafkaConfig, send_kafka_message, setup_kafka_consumer, setup_kafka_producer
 import logging
 import os
 
@@ -11,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "perceived_temperature")
 
 def consume_temperature_messages(
-    temp_consumer: kafka_handler.KafkaConsumer, shared_data: dict, lock: threading.Lock
+    temp_consumer: KafkaConsumer, shared_data: dict, lock: threading.Lock
 ):
     for temp_msg in temp_consumer:
         temp = json.loads(temp_msg.value.get("message"))["temperature_c"]
@@ -22,7 +22,7 @@ def consume_temperature_messages(
                 perceived_temp = calculate_perceived_temperature(
                     temp, shared_data["humidity"]
                 )
-                kafka_handler.send_kafka_message(
+                send_kafka_message(
                     shared_data["producer"],
                     KAFKA_TOPIC,
                     perceived_temp,
@@ -32,7 +32,7 @@ def consume_temperature_messages(
 
 
 def consume_humidity_messages(
-    humidity_consumer: kafka_handler.KafkaConsumer,
+    humidity_consumer: KafkaConsumer,
     shared_data: dict,
     lock: threading.Lock,
 ):
@@ -45,7 +45,7 @@ def consume_humidity_messages(
                 perceived_temp = calculate_perceived_temperature(
                     shared_data["temperature"], humidity
                 )
-                kafka_handler.send_kafka_message(
+                send_kafka_message(
                     shared_data["producer"],
                     KAFKA_TOPIC,
                     perceived_temp,
@@ -56,10 +56,10 @@ def consume_humidity_messages(
 
 def main():
     # Set up Kafka
-    kafka_config = kafka_handler.KafkaConfig()
-    temp_consumer = kafka_handler.setup_kafka_consumer(kafka_config, ["temperatures"])
-    humidity_consumer = kafka_handler.setup_kafka_consumer(kafka_config, ["humidity"])
-    perceived_temp_producer = kafka_handler.setup_kafka_producer(kafka_config)
+    kafka_config = KafkaConfig()
+    temp_consumer = setup_kafka_consumer(kafka_config, ["temperatures"])
+    humidity_consumer = setup_kafka_consumer(kafka_config, ["humidity"])
+    perceived_temp_producer = setup_kafka_producer(kafka_config)
 
     shared_data = {
         "temperature": None,
