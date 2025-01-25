@@ -14,8 +14,10 @@ import os
 # Set up basic logging
 logging.basicConfig(level=logging.INFO)
 
-KAFKA_TOPIC = os.getenv("KAFKA_TOPIC", "perceived_temperature")
-
+# Kafka topics
+KAFKA_PRODUCER_TOPIC = os.getenv("KAFKA_TOPIC", "perceived_temperature")
+KAFKA_TEMP_TOPIC = os.getenv("KAFKA_TEMP_TOPIC", "temperatures")
+KAFKA_HUMIDITY_TOPIC = os.getenv("KAFKA_HUMIDITY_TOPIC", "humidity")
 
 def consume_temperature_messages(
     temperature_consumer: KafkaConsumer, 
@@ -72,7 +74,7 @@ def create_payload_and_send(
     }
     send_kafka_message(
         shared_data["producer"],
-        KAFKA_TOPIC,
+        KAFKA_PRODUCER_TOPIC,
         payload,
     )
     logging.info(f"Sent perceived temperature: {perceived_temp}")
@@ -81,8 +83,8 @@ def create_payload_and_send(
 def main():
     # Set up Kafka
     kafka_config = KafkaConfig()
-    temp_consumer = setup_kafka_consumer(kafka_config, ["temperatures"])
-    humidity_consumer = setup_kafka_consumer(kafka_config, ["humidity"])
+    temp_consumer = setup_kafka_consumer(kafka_config, [KAFKA_TEMP_TOPIC])
+    humidity_consumer = setup_kafka_consumer(kafka_config, [KAFKA_HUMIDITY_TOPIC])
     perceived_temp_producer = setup_kafka_producer(kafka_config)
 
     # Shared data between threads
