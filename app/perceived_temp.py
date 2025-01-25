@@ -43,6 +43,3 @@ def calculate_perceived_temperature(
             + (humidity * 0.094)
         )
         return (perceived_in_fahrenheit - 32) / 1.8
-
-
-print(calculate_perceived_temperature(16, 44))  # 30.0
