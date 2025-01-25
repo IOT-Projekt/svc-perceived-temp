@@ -4,9 +4,9 @@ def calculate_perceived_temperature(
     """
     Calculate the perceived temperature based on the real temperature and humidity.
 
-    :param temperature_celsius: Real temperature in Celsius
-    :param humidity: Humidity percentage (0-100)
-    :return: Perceived temperature in Celsius
+    temperature_celsius: Real temperature in Celsius
+    humidity: Humidity percentage (0-100)
+    return: Perceived temperature in Celsius
     """
     # Constants based on: https://en.wikipedia.org/wiki/Heat_index and https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
     C1 = -8.78469475556
