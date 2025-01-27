@@ -27,8 +27,8 @@ def consume_temperature_messages(
     """Consume temperature messages from kafka and calculate the perceived temperature, if humidity data is available"""
     for temp_msg in temperature_consumer:        
         # Get temperature and timestamp from mesasge
-        temp = json.loads(temp_msg.value.get("message"))["temperature_c"]
-        timestamp = json.loads(temp_msg.value.get("message"))["timestamp"]
+        temp = json.loads(temp_msg.value)["temperature_c"]
+        timestamp = json.loads(temp_msg.value)["timestamp"]
 
         # log received temperature        
         logging.info(f"Received temperature: {temp}") 
@@ -57,8 +57,8 @@ def consume_humidity_messages(
     """Consume humidity messages from kafka and calculate the perceived temperature, if temperature data is available"""
     for humidity_msg in humidity_consumer:        
         # Get humidity and timestamp from message
-        humidity = json.loads(humidity_msg.value.get("message"))["humidity"]
-        timestamp = json.loads(humidity_msg.value.get("message"))["timestamp"]
+        humidity = json.loads(humidity_msg.value)["humidity"]
+        timestamp = json.loads(humidity_msg.value)["timestamp"]
         
         # log received humidity
         logging.info(f"Received humidity: {humidity}")
