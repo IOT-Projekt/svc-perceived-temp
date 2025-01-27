@@ -25,12 +25,14 @@ def consume_temperature_messages(
     lock: threading.Lock
 ) -> None:
     """Consume temperature messages from kafka and calculate the perceived temperature, if humidity data is available"""
-    for temp_msg in temperature_consumer:
-        logging.info(f"Received temperature: {temp}") # log received temperature
-        
+    for temp_msg in temperature_consumer:        
         # Get temperature and timestamp from mesasge
         temp = json.loads(temp_msg.value.get("message"))["temperature_c"]
         timestamp = json.loads(temp_msg.value.get("message"))["timestamp"]
+
+        # log received temperature        
+        logging.info(f"Received temperature: {temp}") 
+
         
         # calculate perceived temperature and update shared data
         # Use lock to prevent both threads from updating/reading shared data at the same time  
@@ -53,12 +55,13 @@ def consume_humidity_messages(
     lock: threading.Lock,
 ) -> None:
     """Consume humidity messages from kafka and calculate the perceived temperature, if temperature data is available"""
-    for humidity_msg in humidity_consumer:
-        logging.info(f"Received humidity: {humidity}")
-        
+    for humidity_msg in humidity_consumer:        
         # Get humidity and timestamp from message
         humidity = json.loads(humidity_msg.value.get("message"))["humidity"]
         timestamp = json.loads(humidity_msg.value.get("message"))["timestamp"]
+        
+        # log received humidity
+        logging.info(f"Received humidity: {humidity}")
         
         # update shared data with humidity and calculate perceived temperature
         # Use lock to prevent both threads from updating/reading shared data at the same time
