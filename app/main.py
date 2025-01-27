@@ -15,7 +15,7 @@ import os
 logging.basicConfig(level=logging.INFO)
 
 # Kafka topics from environment variables
-KAFKA_PRODUCER_TOPIC = os.getenv("KAFKA_TOPIC", "perceived_temperature")
+KAFKA_PRODUCER_TOPIC = os.getenv("KAFKA_PRODUCER_TOPIC", "perceived_temperature")
 KAFKA_TEMP_TOPIC = os.getenv("KAFKA_TEMP_TOPIC", "temperatures")
 KAFKA_HUMIDITY_TOPIC = os.getenv("KAFKA_HUMIDITY_TOPIC", "humidity")
 
